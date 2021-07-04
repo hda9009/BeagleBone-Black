@@ -62,7 +62,7 @@ int processTriggerValues (int led, char argv[] )
 
 int main(int argc, char *argv[])
 {
-	printf("**** This application controls the USER Led: %d *******\n", argc);
+	printf("**** This application controls the USER Led: %d *******\n", argc - 1);
 
 #if 1
 	switch (argc)
