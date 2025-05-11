@@ -57,7 +57,7 @@ int uart_file_access(uint8_t uart_file_number)
     char buff[256];
     snprintf(buff, sizeof(buff), UART_FILE_PATH, uart_file_number);
 
-    int fd = open(buff, O_RDONLY | O_NOCTTY);
+    int fd = open(buff, O_RDWR | O_NOCTTY);
     if (fd < 0)
     {
         printf("Unable to open UART: %d file\n", uart_file_number);
@@ -144,21 +144,29 @@ uint8_t configure_uart_settings(int file_handler, int uart_baud_rate)
 void establish_uart_communication(int file_handler)
 {
     char buffer[256];
+    ssize_t bytes = 0;
 
     while (1)
     {
         snprintf(buffer, 50, "hello please type something\n\t");
         printf("Sending = %s", buffer);
-        write(file_handler, buffer, strlen(buffer));
+        bytes = write(file_handler, buffer, strlen(buffer));
 
-        int n = read(file_handler, buffer, sizeof(buffer));
-
-        if (n > 0)
+        if (bytes < 0)
         {
-            buffer[n] = '\0';
+            perror("Error writing to UART");
+            close(file_handler);
+            break;
+        }
+
+        bytes = read(file_handler, buffer, strlen(buffer));
+
+        if (bytes > 0)
+        {
+            buffer[bytes] = '\0';
             printf("%s\n\n", buffer);
         }
-        if (n < 0)
+        if (bytes < 0)
         {
             perror("Error reading from UART");
             break;
